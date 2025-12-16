@@ -106,163 +106,6 @@
 </body>
 
 </html>
-document.addEventListener('DOMContentLoaded', () => {
-    // 2025 Rates
-    const LIMIT = 240; // Ulusal Tarife Limit (kWh)
-    const PRICE_TIER_1 = 2.59; // Düşük Kademe Birim Fiyatı (TL)
-    const PRICE_TIER_2 = 3.92; // Yüksek Kademe Birim Fiyatı (TL)
-
-    // DOM Elements
-    const consumptionInput = document.getElementById('consumption');
-    const calculateBtn = document.getElementById('calculateBtn');
-    const resultCard = document.getElementById('resultCard');
-    const totalAmountEl = document.getElementById('totalAmount');
-    const tier1CostEl = document.getElementById('tier1Cost');
-    const tier2CostEl = document.getElementById('tier2Cost');
-
-    // New Elements
-    const progressContainer = document.getElementById('progressContainer');
-    const consumptionBar = document.getElementById('consumptionBar');
-    const tierInfoText = document.getElementById('tierInfoText');
-
-    // Utility to format currency
-    const formatCurrency = (amount) => {
-        return amount.toLocaleString('tr-TR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-    };
-
-    // Calculation Function
-    const calculate = () => {
-        const kwh = parseFloat(consumptionInput.value);
-
-        if (isNaN(kwh) || kwh < 0) {
-            alert("Lütfen geçerli bir tüketim değeri giriniz.");
-            return;
-        }
-
-        let total = 0;
-        let tier1Total = 0;
-        let tier2Total = 0;
-
-        if (kwh <= LIMIT) {
-            tier1Total = kwh * PRICE_TIER_1;
-            tier2Total = 0;
-        } else {
-            tier1Total = LIMIT * PRICE_TIER_1;
-            const remainder = kwh - LIMIT;
-            tier2Total = remainder * PRICE_TIER_2;
-        }
-
-        total = tier1Total + tier2Total;
-
-        // Display results
-        displayResults(total, tier1Total, tier2Total);
-    };
-
-    const displayResults = (total, tier1, tier2) => {
-        // Show card if hidden
-        if (resultCard.classList.contains('hidden')) {
-            resultCard.style.display = 'block';
-            // Slight delay to allow display block to apply before removing opacity class
-            setTimeout(() => {
-                resultCard.classList.remove('hidden');
-            }, 10);
-        }
-
-        // Show Progress Bar
-        if (progressContainer.classList.contains('hidden')) {
-            progressContainer.classList.remove('hidden');
-        }
-
-        // Update Progress Bar
-        updateProgressBar(parseFloat(consumptionInput.value));
-
-        // Animate Numbers
-        animateValue(totalAmountEl, 0, total, 1000);
-
-        // Update Breakdown text directly
-        tier1CostEl.textContent = `${formatCurrency(tier1)} ₺`;
-        tier2CostEl.textContent = `${formatCurrency(tier2)} ₺`;
-    };
-
-    const updateProgressBar = (kwh) => {
-        const MAX_DISPLAY_VAL = 500; // The 'end' of our bar visual
-        let percentage = (kwh / MAX_DISPLAY_VAL) * 100;
-
-        if (percentage > 100) percentage = 100;
-
-        consumptionBar.style.width = `${percentage}%`;
-
-        if (kwh > LIMIT) {
-            consumptionBar.classList.add('over-limit');
-            consumptionBar.style.background = 'linear-gradient(90deg, var(--primary-color) 0%, var(--secondary-color) 100%)';
-            tierInfoText.innerHTML = `240 kWh limitini <span>${(kwh - LIMIT).toFixed(0)} kWh</span> aştınız. <br> Yüksek kademeden ücretlendiriliyorsunuz.`;
-        } else {
-            consumptionBar.classList.remove('over-limit');
-            consumptionBar.style.background = 'linear-gradient(90deg, #2ecc71 0%, var(--primary-color) 100%)'; // Reset to green-orange
-            tierInfoText.innerHTML = `Düşük kademe tarifesindesiniz. <br> Limite kalan: <span>${(LIMIT - kwh).toFixed(0)} kWh</span>`;
-        }
-    };
-
-    // Number Counting Animation
-    const animateValue = (obj, start, end, duration) => {
-        let startTimestamp = null;
-        const step = (timestamp) => {
-            if (!startTimestamp) startTimestamp = timestamp;
-            const progress = Math.min((timestamp - startTimestamp) / duration, 1);
-
-            // Easing function for smooth stop
-            const easeOutQuart = 1 - Math.pow(1 - progress, 4);
-
-            const currentVal = start + (end - start) * easeOutQuart;
-            obj.innerHTML = formatCurrency(currentVal);
-
-            if (progress < 1) {
-                window.requestAnimationFrame(step);
-            }
-        };
-        window.requestAnimationFrame(step);
-    };
-
-    // Event Listeners
-    calculateBtn.addEventListener('click', calculate);
-
-    consumptionInput.addEventListener('keypress', (e) => {
-        if (e.key === 'Enter') {
-            calculate();
-        }
-    });
-
-    // Input focus interaction
-    consumptionInput.addEventListener('focus', () => {
-        consumptionInput.parentElement.classList.add('focused');
-    });
-
-    consumptionInput.addEventListener('blur', () => {
-        consumptionInput.parentElement.classList.remove('focused');
-    });
-
-    // Quick Select Chips
-    const chips = document.querySelectorAll('.chip');
-
-    chips.forEach(chip => {
-        chip.addEventListener('click', () => {
-            // Remove active from all
-            chips.forEach(c => c.classList.remove('active'));
-            // Add to clicked
-            chip.classList.add('active');
-
-            // Set value and calculate
-            consumptionInput.value = chip.dataset.value;
-            calculate();
-        });
-    });
-
-    // Remove active state from chips if user types manually
-    consumptionInput.addEventListener('input', () => {
-        chips.forEach(c => c.classList.remove('active'));
-    });
-});
-
 :root {
     --primary-color: #FF512F;
     --secondary-color: #DD2476;
@@ -716,3 +559,159 @@ input[type="number"]:focus {
     border: none;
     box-shadow: 0 4px 10px rgba(221, 36, 118, 0.3);
 }
+document.addEventListener('DOMContentLoaded', () => {
+    // 2025 Rates
+    const LIMIT = 240; // Ulusal Tarife Limit (kWh)
+    const PRICE_TIER_1 = 2.59; // Düşük Kademe Birim Fiyatı (TL)
+    const PRICE_TIER_2 = 3.92; // Yüksek Kademe Birim Fiyatı (TL)
+
+    // DOM Elements
+    const consumptionInput = document.getElementById('consumption');
+    const calculateBtn = document.getElementById('calculateBtn');
+    const resultCard = document.getElementById('resultCard');
+    const totalAmountEl = document.getElementById('totalAmount');
+    const tier1CostEl = document.getElementById('tier1Cost');
+    const tier2CostEl = document.getElementById('tier2Cost');
+
+    // New Elements
+    const progressContainer = document.getElementById('progressContainer');
+    const consumptionBar = document.getElementById('consumptionBar');
+    const tierInfoText = document.getElementById('tierInfoText');
+
+    // Utility to format currency
+    const formatCurrency = (amount) => {
+        return amount.toLocaleString('tr-TR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    };
+
+    // Calculation Function
+    const calculate = () => {
+        const kwh = parseFloat(consumptionInput.value);
+
+        if (isNaN(kwh) || kwh < 0) {
+            alert("Lütfen geçerli bir tüketim değeri giriniz.");
+            return;
+        }
+
+        let total = 0;
+        let tier1Total = 0;
+        let tier2Total = 0;
+
+        if (kwh <= LIMIT) {
+            tier1Total = kwh * PRICE_TIER_1;
+            tier2Total = 0;
+        } else {
+            tier1Total = LIMIT * PRICE_TIER_1;
+            const remainder = kwh - LIMIT;
+            tier2Total = remainder * PRICE_TIER_2;
+        }
+
+        total = tier1Total + tier2Total;
+
+        // Display results
+        displayResults(total, tier1Total, tier2Total);
+    };
+
+    const displayResults = (total, tier1, tier2) => {
+        // Show card if hidden
+        if (resultCard.classList.contains('hidden')) {
+            resultCard.style.display = 'block';
+            // Slight delay to allow display block to apply before removing opacity class
+            setTimeout(() => {
+                resultCard.classList.remove('hidden');
+            }, 10);
+        }
+
+        // Show Progress Bar
+        if (progressContainer.classList.contains('hidden')) {
+            progressContainer.classList.remove('hidden');
+        }
+
+        // Update Progress Bar
+        updateProgressBar(parseFloat(consumptionInput.value));
+
+        // Animate Numbers
+        animateValue(totalAmountEl, 0, total, 1000);
+
+        // Update Breakdown text directly
+        tier1CostEl.textContent = `${formatCurrency(tier1)} ₺`;
+        tier2CostEl.textContent = `${formatCurrency(tier2)} ₺`;
+    };
+
+    const updateProgressBar = (kwh) => {
+        const MAX_DISPLAY_VAL = 500; // The 'end' of our bar visual
+        let percentage = (kwh / MAX_DISPLAY_VAL) * 100;
+
+        if (percentage > 100) percentage = 100;
+
+        consumptionBar.style.width = `${percentage}%`;
+
+        if (kwh > LIMIT) {
+            consumptionBar.classList.add('over-limit');
+            consumptionBar.style.background = 'linear-gradient(90deg, var(--primary-color) 0%, var(--secondary-color) 100%)';
+            tierInfoText.innerHTML = `240 kWh limitini <span>${(kwh - LIMIT).toFixed(0)} kWh</span> aştınız. <br> Yüksek kademeden ücretlendiriliyorsunuz.`;
+        } else {
+            consumptionBar.classList.remove('over-limit');
+            consumptionBar.style.background = 'linear-gradient(90deg, #2ecc71 0%, var(--primary-color) 100%)'; // Reset to green-orange
+            tierInfoText.innerHTML = `Düşük kademe tarifesindesiniz. <br> Limite kalan: <span>${(LIMIT - kwh).toFixed(0)} kWh</span>`;
+        }
+    };
+
+    // Number Counting Animation
+    const animateValue = (obj, start, end, duration) => {
+        let startTimestamp = null;
+        const step = (timestamp) => {
+            if (!startTimestamp) startTimestamp = timestamp;
+            const progress = Math.min((timestamp - startTimestamp) / duration, 1);
+
+            // Easing function for smooth stop
+            const easeOutQuart = 1 - Math.pow(1 - progress, 4);
+
+            const currentVal = start + (end - start) * easeOutQuart;
+            obj.innerHTML = formatCurrency(currentVal);
+
+            if (progress < 1) {
+                window.requestAnimationFrame(step);
+            }
+        };
+        window.requestAnimationFrame(step);
+    };
+
+    // Event Listeners
+    calculateBtn.addEventListener('click', calculate);
+
+    consumptionInput.addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') {
+            calculate();
+        }
+    });
+
+    // Input focus interaction
+    consumptionInput.addEventListener('focus', () => {
+        consumptionInput.parentElement.classList.add('focused');
+    });
+
+    consumptionInput.addEventListener('blur', () => {
+        consumptionInput.parentElement.classList.remove('focused');
+    });
+
+    // Quick Select Chips
+    const chips = document.querySelectorAll('.chip');
+
+    chips.forEach(chip => {
+        chip.addEventListener('click', () => {
+            // Remove active from all
+            chips.forEach(c => c.classList.remove('active'));
+            // Add to clicked
+            chip.classList.add('active');
+
+            // Set value and calculate
+            consumptionInput.value = chip.dataset.value;
+            calculate();
+        });
+    });
+
+    // Remove active state from chips if user types manually
+    consumptionInput.addEventListener('input', () => {
+        chips.forEach(c => c.classList.remove('active'));
+    });
+});
